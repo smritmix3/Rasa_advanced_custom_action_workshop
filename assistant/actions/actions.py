@@ -41,6 +41,7 @@ class ActionSessionStart(Action):
 
         user_profile = tracker.get_slot("user_profile")
         user_name = tracker.get_slot("user_name")
+        is_connected = True
        
         if user_profile is None:
             id = get_user_id_from_event(tracker)
@@ -49,6 +50,9 @@ class ActionSessionStart(Action):
             else:    
                 # Make an actual call to Snow API.
                 user_profile = await snow.get_user_profile(id)
+            if user_profile == False:  
+                user_profile = anonymous_profile
+                is_connected = False                  
 
             slots.append(SlotSet(key="user_profile", value=user_profile))
             slots.append(SlotSet(key="user_email", value=user_profile.get("email")))
@@ -58,7 +62,7 @@ class ActionSessionStart(Action):
             slots.append(SlotSet(key="user_name", value=user_profile.get("name")))
             slots.append(SlotSet(key="user_email", value=user_profile.get("email")))
 
-        return slots
+        return is_connected, slots
 
          
     async def run(
@@ -73,13 +77,16 @@ class ActionSessionStart(Action):
 
         # any slots that should be carried over should come after the
         # `session_started` event
-        newEvents = await self.fetch_slots(tracker)
-        events.extend(newEvents)
+        is_connected, newEvents = await self.fetch_slots(tracker)
+        if is_connected:            
+            events.extend(newEvents)
 
-        # an `action_listen` should be added at the end as a user message follows
-        events.append(ActionExecuted("action_listen"))
+            # an `action_listen` should be added at the end as a user message follows
+            events.append(ActionExecuted("action_listen"))
 
-        return events
+            return events
+        else:
+            dispatcher.utter_message("Service Now is not able to process your request. Please try after sometime or contact support@servicenow.com")            
 
 class IncidentStatus(Action):
     def name(self) -> Text:
@@ -210,7 +217,6 @@ class OpenIncidentForm(FormAction):
         """Create an incident and return the details"""
 
         user_profile = tracker.get_slot("user_profile")
-        print(user_profile)
         confirm = tracker.get_slot("confirm")
 
         if not confirm:
@@ -240,6 +246,9 @@ class OpenIncidentForm(FormAction):
                     f"Incident {incident_number} has been opened for you. "
                     f"A support specialist will reach out to you soon."
                 )
+            elif result == False:
+                #Exercise3 the assistant should notify the user if ServiceNow is down.
+                message = ("Service Now is not able to process your request. Please try after sometime or contact support@servicenow.com")
             else:
                 message = (
                     f"Something went wrong while opening an incident for you. "

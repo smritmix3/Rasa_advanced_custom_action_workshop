@@ -31,6 +31,7 @@ class SnowAPI:
         task = loop.create_task(self.close_session())
         # loop.add_signal_handler(signal.SIGTERM, task)
         self._loop = loop
+        self._server_connection = True
 
     async def open_session(self) -> ClientSession:  
         """Opens the client session if it hasn't been opened yet,
@@ -64,23 +65,34 @@ class SnowAPI:
         Returns:
             A dictionary with user profile information.
         """
-        
-        url = f"{self.base_api_url}/table/sys_user/{id}"
-        session = await self.open_session()
+        try:
+            #Exercise3 
+            #Enhance the exception handling of the assistant such that it can gracefully handle connection errors
+            # Adding a try except to catch any excptions and to display a generic try again later messge to user
+            url = f"{self.base_api_url}/table/sys_user/{id}"
+            session = await self.open_session()
 
-        async with session.get(url) as resp:
-            if resp.status != 200:
-                logger.error("Unable to load user profile. Status: %d", resp.status)
-                return anonymous_profile
-            
-            resp_json = await resp.json()
-            user = resp_json.get("result")            
-            user_profile = {
-                "id": id,
-                "name": user.get("name"),
-                "email": user.get("email")
-            }
-            return user_profile
+            async with session.get(url) as resp:
+                if resp.status != 200:
+                    logger.error("Unable to load user profile. Status: %d", resp.status)
+                    return anonymous_profile
+                elif resp.status == 500 or resp.status == 503:
+                    logger.error("Server is down. Status: %d",resp.status)
+                    self._server_connection = False
+                    return self._server_connection
+                
+                resp_json = await resp.json()
+                user = resp_json.get("result")            
+                user_profile = {
+                    "id": id,
+                    "name": user.get("name"),
+                    "email": user.get("email")
+                }
+                return user_profile
+        except Exception as e:
+                logger.error("Exception encountered:"+str(e))
+                self._server_connection = False
+                return self._server_connection    
 
     async def retrieve_incidents(self, user_profile) -> Dict[Text, Any]:
         caller_id = user_profile.get("id")
