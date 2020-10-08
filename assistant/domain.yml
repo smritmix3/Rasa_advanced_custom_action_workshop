@@ -34,6 +34,8 @@ slots:
     type: unfeaturized
   requested_slot:
     type: text  
+  user_email:
+    type: unfeaturized  
 
 responses:
   utter_out_of_scope:
@@ -74,7 +76,8 @@ responses:
   - text: "Should I open an incident with the following details?
           \n    Title: {incident_title}
           \n    Description: {problem_description}          
-          \n    Priority: {priority}"
+          \n    Priority: {priority}
+          \n    Email: {user_email}"
     buttons:
     - title: Yes
       payload: /affirm

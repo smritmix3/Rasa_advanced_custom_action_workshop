@@ -1,8 +1,10 @@
 # Anonymous user profile.
 # Used to debug and test the assistant via shell.
+# setting anonymous email 
 anonymous_profile = {
     "id": "anonymous",
-    "name": "anonymous"
+    "name": "anonymous",
+    "email": "anonymous"
 }
 
 # Priority to urgency ID mappings.

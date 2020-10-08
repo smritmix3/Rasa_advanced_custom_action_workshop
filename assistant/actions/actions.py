@@ -41,7 +41,7 @@ class ActionSessionStart(Action):
 
         user_profile = tracker.get_slot("user_profile")
         user_name = tracker.get_slot("user_name")
-
+       
         if user_profile is None:
             id = get_user_id_from_event(tracker)
             if id == anonymous_profile.get("id"):
@@ -51,9 +51,12 @@ class ActionSessionStart(Action):
                 user_profile = await snow.get_user_profile(id)
 
             slots.append(SlotSet(key="user_profile", value=user_profile))
+            slots.append(SlotSet(key="user_email", value=user_profile.get("email")))
 
         if user_name is None:
+            #get anonymous data if the user is not valid
             slots.append(SlotSet(key="user_name", value=user_profile.get("name")))
+            slots.append(SlotSet(key="user_email", value=user_profile.get("email")))
 
         return slots
 
