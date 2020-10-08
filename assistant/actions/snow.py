@@ -29,7 +29,7 @@ class SnowAPI:
         # asynchronously close the client session.
         loop = asyncio.get_event_loop()
         task = loop.create_task(self.close_session())
-        loop.add_signal_handler(signal.SIGTERM, task)
+        # loop.add_signal_handler(signal.SIGTERM, task)
         self._loop = loop
 
     async def open_session(self) -> ClientSession:  
