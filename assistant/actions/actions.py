@@ -234,7 +234,7 @@ class OpenIncidentForm(FormAction):
                 tracker.get_slot("priority")
             )
             incident_number = result.get("number")
-            email = user_profile['email']
+            
             if incident_number:
                 message = (
                     f"Incident {incident_number} has been opened for you. "
