@@ -207,6 +207,7 @@ class OpenIncidentForm(FormAction):
         """Create an incident and return the details"""
 
         user_profile = tracker.get_slot("user_profile")
+        print(user_profile)
         confirm = tracker.get_slot("confirm")
 
         if not confirm:
@@ -230,6 +231,7 @@ class OpenIncidentForm(FormAction):
                 tracker.get_slot("priority")
             )
             incident_number = result.get("number")
+            email = user_profile['email']
             if incident_number:
                 message = (
                     f"Incident {incident_number} has been opened for you. "
